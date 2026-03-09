@@ -1,37 +1,68 @@
 /**
  * Tilr Service Worker
  * Manages window creation, positioning, group tracking, and restore.
+ * Supports independent layouts per display (multi-monitor).
  */
 
-import { computeLayout, isValidLayout } from '../lib/layouts.js';
+import { computeLayout, isValidLayout, recalculateLayout, getDisplayBounds, findDisplayForWindow } from '../lib/layouts.js';
 
-// --- Session management ---
+// --- Session management (multi-monitor) ---
 
 /**
- * Saves the active layout session to storage.
+ * Saves a layout session for a specific display.
+ * @param {string} displayId
  * @param {string} layoutType
  * @param {number[]} windowIds
+ * @param {{ left: number, top: number, width: number, height: number }} [displayBounds]
  */
-export async function saveSession(layoutType, windowIds) {
-  await chrome.storage.local.set({
-    tabbySession: { layoutType, windowIds },
-  });
+export async function saveSession(displayId, layoutType, windowIds, displayBounds) {
+  const all = await loadAllSessions();
+  all[displayId] = { layoutType, windowIds };
+  if (displayBounds) all[displayId].displayBounds = displayBounds;
+  await chrome.storage.local.set({ tilrSessions: all });
 }
 
 /**
- * Loads the active layout session from storage.
- * @returns {Promise<{ layoutType: string, windowIds: number[] }|null>}
+ * Loads the layout session for a specific display.
+ * @param {string} displayId
+ * @returns {Promise<{ layoutType: string, windowIds: number[], displayBounds?: object }|null>}
  */
-export async function loadSession() {
-  const data = await chrome.storage.local.get('tabbySession');
-  return data.tabbySession || null;
+export async function loadSession(displayId) {
+  const all = await loadAllSessions();
+  return all[displayId] || null;
 }
 
 /**
- * Clears the active layout session from storage.
+ * Loads all layout sessions (all displays).
+ * @returns {Promise<Object>}
  */
-export async function clearSession() {
-  await chrome.storage.local.remove('tabbySession');
+export async function loadAllSessions() {
+  const data = await chrome.storage.local.get('tilrSessions');
+  return data.tilrSessions || {};
+}
+
+/**
+ * Clears the layout session for a specific display.
+ * @param {string} displayId
+ */
+export async function clearSession(displayId) {
+  const all = await loadAllSessions();
+  delete all[displayId];
+  await chrome.storage.local.set({ tilrSessions: all });
+}
+
+/**
+ * Resolves the display ID for a given window.
+ * @param {number} windowId
+ * @returns {Promise<{ displayId: string, displayBounds: object }|null>}
+ */
+export async function resolveDisplay(windowId) {
+  const [displays, win] = await Promise.all([
+    chrome.system.display.getInfo(),
+    chrome.windows.get(windowId),
+  ]);
+  const display = findDisplayForWindow(displays, { left: win.left, top: win.top });
+  return { displayId: display.id, displayBounds: getDisplayBounds(display) };
 }
 
 // --- Layout operations ---
@@ -39,8 +70,8 @@ export async function clearSession() {
 /**
  * Gets display info for the specified window and computes layout positions.
  * @param {string} layoutType
- * @param {number} windowId - The window ID from the popup (the actual user window)
- * @returns {Promise<{ positions: Array, sourceWindow: object }|null>}
+ * @param {number} windowId
+ * @returns {Promise<{ positions: Array, sourceWindow: object, displayId: string, displayBounds: object }|null>}
  */
 export async function resolveLayout(layoutType, windowId) {
   if (!isValidLayout(layoutType)) return null;
@@ -54,31 +85,28 @@ export async function resolveLayout(layoutType, windowId) {
   const positions = computeLayout(displays, windowPosition, layoutType);
 
   if (!positions) return null;
-  return { positions, sourceWindow };
+
+  const display = findDisplayForWindow(displays, windowPosition);
+  const displayBounds = getDisplayBounds(display);
+  return { positions, sourceWindow, displayId: display.id, displayBounds };
 }
 
 /**
  * Distributes tabs from the source window across layout windows.
- * The first tab stays in the source window; remaining tabs are moved
- * one per window in order. Extra tabs stay in the source window.
- * After moving, removes the initial blank tabs created by chrome.windows.create()
- * and activates the moved tab in each window.
  * @param {number} sourceWindowId
- * @param {number[]} windowIds - All window IDs in the layout (including source)
- * @param {number[]} initialTabIds - Tab IDs of blank tabs created with each new window
+ * @param {number[]} windowIds
+ * @param {number[]} initialTabIds
  */
 export async function distributeTabs(sourceWindowId, windowIds, initialTabIds) {
   const tabs = await chrome.tabs.query({ windowId: sourceWindowId });
   if (tabs.length <= 1) return;
 
-  // Skip the first tab (stays in source window), distribute the rest
   let windowIndex = 1;
   for (let i = 1; i < tabs.length && windowIndex < windowIds.length; i++, windowIndex++) {
     await chrome.tabs.move(tabs[i].id, { windowId: windowIds[windowIndex], index: -1 });
     await chrome.tabs.update(tabs[i].id, { active: true });
   }
 
-  // Remove initial blank tabs from windows that received a real tab
   for (const tabId of initialTabIds) {
     try {
       await chrome.tabs.remove(tabId);
@@ -90,25 +118,27 @@ export async function distributeTabs(sourceWindowId, windowIds, initialTabIds) {
 
 /**
  * Applies a layout: repositions the source window, creates new ones, saves session.
- * Optionally distributes existing tabs across the layout windows.
+ * Only restores a previous layout on the same display.
  * @param {string} layoutType
- * @param {number} windowId - The window ID sent from the popup
- * @param {boolean} useCurrentTabs - Whether to distribute existing tabs
+ * @param {number} windowId
+ * @param {boolean} useCurrentTabs
  * @returns {Promise<{ success: boolean, windowIds?: number[], error?: string }>}
  */
 export async function applyLayout(layoutType, windowId, useCurrentTabs = false) {
-  // If there's an existing session, restore first
-  const existing = await loadSession();
-  if (existing) {
-    await restoreLayout();
-  }
-
   const resolved = await resolveLayout(layoutType, windowId);
   if (!resolved) {
     return { success: false, error: `Invalid layout: ${layoutType}` };
   }
 
-  const { positions, sourceWindow } = resolved;
+  const { positions, sourceWindow, displayId, displayBounds } = resolved;
+
+  // If there's an existing session on this display, restore it first
+  const existing = await loadSession(displayId);
+  if (existing) {
+    await restoreSessionWindows(existing);
+    await clearSession(displayId);
+  }
+
   const windowIds = [];
   const initialTabIds = [];
 
@@ -132,18 +162,16 @@ export async function applyLayout(layoutType, windowId, useCurrentTabs = false) 
       focused: false,
     });
     windowIds.push(newWindow.id);
-    // Track the blank tab created with each new window
     if (newWindow.tabs && newWindow.tabs.length > 0) {
       initialTabIds.push(newWindow.tabs[0].id);
     }
   }
 
-  // Distribute tabs if requested
   if (useCurrentTabs) {
     await distributeTabs(sourceWindow.id, windowIds, initialTabIds);
   }
 
-  await saveSession(layoutType, windowIds);
+  await saveSession(displayId, layoutType, windowIds, displayBounds);
   await saveLastLayout(layoutType);
   return { success: true, windowIds };
 }
@@ -159,25 +187,19 @@ export function isEmptyTab(tab) {
 }
 
 /**
- * Restores layout: moves real tabs back to the first window, closes empty tabs and extras.
- * @returns {Promise<{ success: boolean, error?: string }>}
+ * Restores windows from a session object (moves tabs, closes windows).
+ * Internal helper — does not clear the session from storage.
+ * @param {{ windowIds: number[] }} session
  */
-export async function restoreLayout() {
-  const session = await loadSession();
-  if (!session) {
-    return { success: false, error: 'No active layout' };
-  }
-
+async function restoreSessionWindows(session) {
   const { windowIds } = session;
   const primaryId = windowIds[0];
 
-  // Move tabs from secondary windows to the primary window
   for (let i = 1; i < windowIds.length; i++) {
     try {
       const tabs = await chrome.tabs.query({ windowId: windowIds[i] });
       for (const tab of tabs) {
         if (isEmptyTab(tab)) {
-          // Close empty/newtab tabs instead of moving them
           try { await chrome.tabs.remove(tab.id); } catch (_e) { /* tab may be gone */ }
         } else {
           await chrome.tabs.move(tab.id, { windowId: primaryId, index: -1 });
@@ -188,8 +210,22 @@ export async function restoreLayout() {
       // Window may have been closed by user already
     }
   }
+}
 
-  await clearSession();
+/**
+ * Restores layout for the display where the given window resides.
+ * @param {number} windowId - The window ID to determine which display to restore
+ * @returns {Promise<{ success: boolean, error?: string }>}
+ */
+export async function restoreLayout(windowId) {
+  const { displayId } = await resolveDisplay(windowId);
+  const session = await loadSession(displayId);
+  if (!session) {
+    return { success: false, error: 'No active layout' };
+  }
+
+  await restoreSessionWindows(session);
+  await clearSession(displayId);
   return { success: true };
 }
 
@@ -198,7 +234,7 @@ export async function restoreLayout() {
  * @param {string} layoutType
  */
 export async function saveLastLayout(layoutType) {
-  await chrome.storage.local.set({ tabbyLastLayout: layoutType });
+  await chrome.storage.local.set({ tilrLastLayout: layoutType });
 }
 
 /**
@@ -206,39 +242,105 @@ export async function saveLastLayout(layoutType) {
  * @returns {Promise<string|null>}
  */
 export async function loadLastLayout() {
-  const data = await chrome.storage.local.get('tabbyLastLayout');
-  return data.tabbyLastLayout || null;
+  const data = await chrome.storage.local.get('tilrLastLayout');
+  return data.tilrLastLayout || null;
 }
 
 /**
- * Returns the current session status and last used layout.
+ * Returns the current session status for the display where the given window resides.
+ * @param {number} windowId
  * @returns {Promise<{ active: boolean, layoutType?: string, windowIds?: number[], lastLayout?: string }>}
  */
-export async function getStatus() {
-  const [session, lastLayout] = await Promise.all([loadSession(), loadLastLayout()]);
+export async function getStatus(windowId) {
+  const [{ displayId }, lastLayout] = await Promise.all([
+    resolveDisplay(windowId),
+    loadLastLayout(),
+  ]);
+  const session = await loadSession(displayId);
   if (!session) return { active: false, lastLayout };
   return { active: true, layoutType: session.layoutType, windowIds: session.windowIds, lastLayout };
 }
 
 /**
- * Removes a closed window from the active session.
- * Clears session if all secondary windows are gone.
+ * Removes a closed window from any active session.
+ * Clears that session if all secondary windows are gone.
  * @param {number} closedWindowId
  */
 export async function handleWindowClosed(closedWindowId) {
-  const session = await loadSession();
-  if (!session) return;
+  const all = await loadAllSessions();
 
-  const idx = session.windowIds.indexOf(closedWindowId);
-  if (idx === -1) return;
+  for (const [displayId, session] of Object.entries(all)) {
+    const idx = session.windowIds.indexOf(closedWindowId);
+    if (idx === -1) continue;
 
-  session.windowIds.splice(idx, 1);
+    session.windowIds.splice(idx, 1);
 
-  // If only one window left (or none), clear the session
-  if (session.windowIds.length <= 1) {
-    await clearSession();
-  } else {
-    await saveSession(session.layoutType, session.windowIds);
+    if (session.windowIds.length <= 1) {
+      await clearSession(displayId);
+    } else {
+      await saveSession(displayId, session.layoutType, session.windowIds, session.displayBounds);
+    }
+    return;
+  }
+}
+
+// --- Dynamic resize ---
+
+let isAdjusting = false;
+let boundsChangeTimer = null;
+const DEBOUNCE_MS = 100;
+
+/**
+ * Handles a window bounds change by recalculating and adjusting adjacent windows.
+ * Searches all sessions to find which layout the window belongs to.
+ * @param {object} chromeWindow
+ */
+export async function handleBoundsChanged(chromeWindow) {
+  if (isAdjusting) return;
+
+  const all = await loadAllSessions();
+  let foundSession = null;
+  let changedIndex = -1;
+
+  for (const session of Object.values(all)) {
+    const idx = session.windowIds.indexOf(chromeWindow.id);
+    if (idx !== -1) {
+      foundSession = session;
+      changedIndex = idx;
+      break;
+    }
+  }
+
+  if (!foundSession || !foundSession.displayBounds) return;
+
+  const { layoutType, windowIds, displayBounds } = foundSession;
+
+  const changedBounds = {
+    left: chromeWindow.left,
+    top: chromeWindow.top,
+    width: chromeWindow.width,
+    height: chromeWindow.height,
+  };
+
+  const newPositions = recalculateLayout(changedIndex, changedBounds, displayBounds, layoutType);
+  if (!newPositions) return;
+
+  isAdjusting = true;
+  try {
+    for (let i = 0; i < windowIds.length; i++) {
+      if (i === changedIndex) continue;
+      const pos = newPositions[i];
+      await chrome.windows.update(windowIds[i], {
+        left: pos.left,
+        top: pos.top,
+        width: pos.width,
+        height: pos.height,
+      });
+    }
+  } catch (_e) {
+    // Window may have been closed
+  } finally {
+    isAdjusting = false;
   }
 }
 
@@ -246,6 +348,12 @@ export async function handleWindowClosed(closedWindowId) {
 
 chrome.windows.onRemoved.addListener((windowId) => {
   handleWindowClosed(windowId);
+});
+
+chrome.windows.onBoundsChanged.addListener((chromeWindow) => {
+  if (isAdjusting) return;
+  clearTimeout(boundsChangeTimer);
+  boundsChangeTimer = setTimeout(() => handleBoundsChanged(chromeWindow), DEBOUNCE_MS);
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -259,13 +367,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       break;
 
     case 'restoreLayout':
-      restoreLayout()
+      restoreLayout(message.windowId)
         .then(sendResponse)
         .catch((err) => sendResponse({ success: false, error: err.message }));
       break;
 
     case 'getStatus':
-      getStatus()
+      getStatus(message.windowId)
         .then(sendResponse)
         .catch(() => sendResponse({ active: false }));
       break;

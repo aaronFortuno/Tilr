@@ -7,7 +7,7 @@
 ## Architecture (Canonical)
 
 ```
-tabby/
+tilr/
 ├── manifest.json              # Manifest V3
 ├── popup/
 │   ├── popup.html             # Popup UI (layout selector)

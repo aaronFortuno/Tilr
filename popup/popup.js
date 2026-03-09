@@ -60,8 +60,8 @@ export function updateStatus(document, status, getMessage) {
 export function initPopup(document, sendMessage, getMessage, currentWindowId) {
   applyI18n(document, getMessage);
 
-  // Query current status on open
-  sendMessage({ action: 'getStatus' }, (status) => {
+  // Query current status on open (pass windowId for multi-monitor)
+  sendMessage({ action: 'getStatus', windowId: currentWindowId }, (status) => {
     if (status) updateStatus(document, status, getMessage);
   });
 
@@ -83,7 +83,7 @@ export function initPopup(document, sendMessage, getMessage, currentWindowId) {
 
   const restoreBtn = document.getElementById('restoreBtn');
   restoreBtn.addEventListener('click', () => {
-    sendMessage({ action: 'restoreLayout' }, (response) => {
+    sendMessage({ action: 'restoreLayout', windowId: currentWindowId }, (response) => {
       if (response && response.success) {
         updateStatus(document, { active: false }, getMessage);
       }

@@ -146,9 +146,9 @@ describe('initPopup', () => {
     expect(doc.querySelector('[data-i18n="layoutColumns"]').textContent).toBe('Two columns');
   });
 
-  it('should query status on init', () => {
+  it('should query status on init with windowId', () => {
     expect(sendMessage).toHaveBeenCalledWith(
-      { action: 'getStatus' },
+      { action: 'getStatus', windowId: 42 },
       expect.any(Function),
     );
   });
@@ -201,7 +201,7 @@ describe('initPopup', () => {
     restoreBtn.click();
 
     expect(sendMessage).toHaveBeenCalledWith(
-      { action: 'restoreLayout' },
+      { action: 'restoreLayout', windowId: 42 },
       expect.any(Function),
     );
   });

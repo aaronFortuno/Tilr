@@ -18,7 +18,7 @@ Browser extension for Chrome/Chromium/Brave that splits your screen into predefi
 2. Run `npm install` for test dependencies
 3. Open `chrome://extensions/` in your browser
 4. Enable "Developer mode"
-5. Click "Load unpacked" and select the `tabby/` directory
+5. Click "Load unpacked" and select the `tilr/` directory
 
 ## Usage
 
