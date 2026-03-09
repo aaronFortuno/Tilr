@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Split your browser into layouts for comfortable webapp testing",
+    "description": "Extension description"
+  },
+  "layoutColumns": {
+    "message": "Two columns",
+    "description": "1x2 layout label"
+  },
+  "layoutRows": {
+    "message": "Two rows",
+    "description": "2x1 layout label"
+  },
+  "layoutGrid": {
+    "message": "Grid 2x2",
+    "description": "2x2 layout label"
+  },
+  "layout3x2": {
+    "message": "Grid 3x2",
+    "description": "3x2 layout label (3 columns, 2 rows)"
+  },
+  "useCurrentTabs": {
+    "message": "Use current tabs",
+    "description": "Toggle label for distributing existing tabs"
+  },
+  "restore": {
+    "message": "Restore",
+    "description": "Button to restore windows to a single window"
+  },
+  "activeLayout": {
+    "message": "Active layout",
+    "description": "Label shown when a layout is active"
+  },
+  "noActiveLayout": {
+    "message": "No active layout",
+    "description": "Label shown when no layout is active"
+  }
+}

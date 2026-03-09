@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+.container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: #2d2d2d;
+}
+
+.layouts {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.layout-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  flex: 1;
+  min-width: 0;
+}
+
+.layout-btn:hover {
+  border-color: #888;
+  background: #f0f0f0;
+}
+
+.layout-btn.active {
+  border-color: #4a90d9;
+  background: #eef4fb;
+}
+
+.layout-btn.last-used {
+  background: #f0f5fb;
+}
+
+.layout-preview {
+  display: grid;
+  width: 48px;
+  height: 36px;
+  gap: 2px;
+}
+
+.preview-1x2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.preview-2x1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.preview-2x2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.preview-3x2 {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.cell {
+  background: #b8d4f0;
+  border-radius: 2px;
+}
+
+.layout-label {
+  font-size: 11px;
+  color: #666;
+}
+
+.options {
+  display: flex;
+  justify-content: center;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+}
+
+.toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.status {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  padding: 4px 0;
+}
+
+.restore-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #4a90d9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, opacity 0.15s;
+}
+
+.restore-btn:hover:not(:disabled) {
+  background: #3a7bc8;
+}
+
+.restore-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Nombre de la extensión"
+  },
+  "extDescription": {
+    "message": "Divide tu navegador en layouts para testing cómodo de webapps",
+    "description": "Descripción de la extensión"
+  },
+  "layoutColumns": {
+    "message": "Dos columnas",
+    "description": "Etiqueta del layout 1x2"
+  },
+  "layoutRows": {
+    "message": "Dos filas",
+    "description": "Etiqueta del layout 2x1"
+  },
+  "layoutGrid": {
+    "message": "Cuadrícula 2x2",
+    "description": "Etiqueta del layout 2x2"
+  },
+  "layout3x2": {
+    "message": "Cuadrícula 3x2",
+    "description": "Etiqueta del layout 3x2 (3 columnas, 2 filas)"
+  },
+  "useCurrentTabs": {
+    "message": "Usar pestañas actuales",
+    "description": "Toggle para distribuir las pestañas existentes"
+  },
+  "restore": {
+    "message": "Restaurar",
+    "description": "Botón para restaurar ventanas a una sola"
+  },
+  "activeLayout": {
+    "message": "Layout activo",
+    "description": "Etiqueta cuando hay un layout activo"
+  },
+  "noActiveLayout": {
+    "message": "Sin layout activo",
+    "description": "Etiqueta cuando no hay layout activo"
+  }
+}

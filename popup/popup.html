@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+  <title>Tilr</title>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Tilr</h1>
+
+    <div class="layouts">
+      <button class="layout-btn" data-layout="1x2" title="">
+        <div class="layout-preview preview-1x2">
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <span class="layout-label" data-i18n="layoutColumns"></span>
+      </button>
+
+      <button class="layout-btn" data-layout="2x1" title="">
+        <div class="layout-preview preview-2x1">
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <span class="layout-label" data-i18n="layoutRows"></span>
+      </button>
+
+      <button class="layout-btn" data-layout="2x2" title="">
+        <div class="layout-preview preview-2x2">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <span class="layout-label" data-i18n="layoutGrid"></span>
+      </button>
+
+      <button class="layout-btn" data-layout="3x2" title="">
+        <div class="layout-preview preview-3x2">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <span class="layout-label" data-i18n="layout3x2"></span>
+      </button>
+    </div>
+
+    <div class="options">
+      <label class="toggle">
+        <input type="checkbox" id="useCurrentTabs">
+        <span data-i18n="useCurrentTabs"></span>
+      </label>
+    </div>
+
+    <div class="status">
+      <span id="statusText" data-i18n="noActiveLayout"></span>
+    </div>
+
+    <button class="restore-btn" id="restoreBtn" disabled data-i18n="restore"></button>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
