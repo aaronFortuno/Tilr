@@ -22,14 +22,17 @@ Features:
 - Windows managed as a group with automatic cleanup
 - One-click restore to regroup all tabs into one window
 - Multi-monitor support (uses the screen where your current window is)
-- Multilingual: English and Spanish (auto-detected from browser settings)
+- Multilingual: 12 languages (English, Spanish, Catalan, Galician, Basque, German, French, Italian, Portuguese, Danish, Finnish, Dutch)
 - No data collection, no analytics, no external connections
 
 ### Category
 Developer Tools
 
 ### Language
-English (default), Spanish
+English (default), Spanish, Catalan, Galician, Basque, German, French, Italian, Portuguese, Danish, Finnish, Dutch
+
+### Privacy Policy URL
+https://github.com/aaronFortuno/Tilr/blob/main/PRIVACY.md
 
 ## Permission Justifications
 

@@ -1,12 +1,13 @@
 {
   "name": "tilr",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Browser extension for split-screen layouts",
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "package": "node scripts/package.js"
   },
   "devDependencies": {
     "vitest": "^3.0.0",
