@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Laajennuksen nimi"
+  },
+  "extDescription": {
+    "message": "Jaa selain asetteluihin webapp-testausta varten",
+    "description": "Laajennuksen kuvaus"
+  },
+  "layoutColumns": {
+    "message": "Kaksi saraketta",
+    "description": "1x2-asettelun nimike"
+  },
+  "layoutRows": {
+    "message": "Kaksi riviä",
+    "description": "2x1-asettelun nimike"
+  },
+  "layoutGrid": {
+    "message": "Ruudukko 2x2",
+    "description": "2x2-asettelun nimike"
+  },
+  "layout3x2": {
+    "message": "Ruudukko 3x2",
+    "description": "3x2-asettelun nimike (3 saraketta, 2 riviä)"
+  },
+  "useCurrentTabs": {
+    "message": "Käytä nykyisiä välilehtiä",
+    "description": "Kytkin olemassa olevien välilehtien jakamiseen"
+  },
+  "restore": {
+    "message": "Palauta",
+    "description": "Painike ikkunoiden palauttamiseksi yhdeksi"
+  },
+  "activeLayout": {
+    "message": "Aktiivinen asettelu",
+    "description": "Nimike kun asettelu on aktiivinen"
+  },
+  "noActiveLayout": {
+    "message": "Ei aktiivista asettelua",
+    "description": "Nimike kun asettelu ei ole aktiivinen"
+  }
+}

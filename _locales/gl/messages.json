@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Nome da extensión"
+  },
+  "extDescription": {
+    "message": "Divide o navegador en layouts para probar webapps comodamente",
+    "description": "Descrición da extensión"
+  },
+  "layoutColumns": {
+    "message": "Dúas columnas",
+    "description": "Etiqueta do layout 1x2"
+  },
+  "layoutRows": {
+    "message": "Dúas filas",
+    "description": "Etiqueta do layout 2x1"
+  },
+  "layoutGrid": {
+    "message": "Grade 2x2",
+    "description": "Etiqueta do layout 2x2"
+  },
+  "layout3x2": {
+    "message": "Grade 3x2",
+    "description": "Etiqueta do layout 3x2 (3 columnas, 2 filas)"
+  },
+  "useCurrentTabs": {
+    "message": "Usar lapelas actuais",
+    "description": "Toggle para distribuír as lapelas existentes"
+  },
+  "restore": {
+    "message": "Restaurar",
+    "description": "Botón para restaurar fiestras nunha soa"
+  },
+  "activeLayout": {
+    "message": "Layout activo",
+    "description": "Etiqueta cando hai un layout activo"
+  },
+  "noActiveLayout": {
+    "message": "Sen layout activo",
+    "description": "Etiqueta cando non hai layout activo"
+  }
+}

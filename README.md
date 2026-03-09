@@ -10,7 +10,7 @@ Browser extension for Chrome/Chromium/Brave that splits your screen into predefi
 - **One-click restore**: Regroup all tabs back into a single window
 - **Tab distribution**: Optionally spread existing tabs across layout windows (no leftover blank tabs)
 - **Multi-monitor**: Detects which screen you're on and positions windows accordingly
-- **Internationalization**: English and Spanish (auto-detected from browser settings)
+- **Internationalization**: 12 languages — English, Spanish, Catalan, Galician, Basque, German, French, Italian, Portuguese, Danish, Finnish, Dutch
 
 ## Installation (Development)
 

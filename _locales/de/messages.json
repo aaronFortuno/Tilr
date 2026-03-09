@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Name der Erweiterung"
+  },
+  "extDescription": {
+    "message": "Teile deinen Browser in Layouts für komfortables Webapp-Testing",
+    "description": "Beschreibung der Erweiterung"
+  },
+  "layoutColumns": {
+    "message": "Zwei Spalten",
+    "description": "Label für 1x2-Layout"
+  },
+  "layoutRows": {
+    "message": "Zwei Zeilen",
+    "description": "Label für 2x1-Layout"
+  },
+  "layoutGrid": {
+    "message": "Raster 2x2",
+    "description": "Label für 2x2-Layout"
+  },
+  "layout3x2": {
+    "message": "Raster 3x2",
+    "description": "Label für 3x2-Layout (3 Spalten, 2 Zeilen)"
+  },
+  "useCurrentTabs": {
+    "message": "Aktuelle Tabs verwenden",
+    "description": "Schalter zum Verteilen vorhandener Tabs"
+  },
+  "restore": {
+    "message": "Wiederherstellen",
+    "description": "Schaltfläche zum Wiederherstellen in ein einzelnes Fenster"
+  },
+  "activeLayout": {
+    "message": "Aktives Layout",
+    "description": "Label wenn ein Layout aktiv ist"
+  },
+  "noActiveLayout": {
+    "message": "Kein aktives Layout",
+    "description": "Label wenn kein Layout aktiv ist"
+  }
+}

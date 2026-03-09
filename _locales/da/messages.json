@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Udvidelsens navn"
+  },
+  "extDescription": {
+    "message": "Opdel din browser i layouts til komfortabel webapp-test",
+    "description": "Udvidelsens beskrivelse"
+  },
+  "layoutColumns": {
+    "message": "To kolonner",
+    "description": "Label for 1x2-layout"
+  },
+  "layoutRows": {
+    "message": "To rækker",
+    "description": "Label for 2x1-layout"
+  },
+  "layoutGrid": {
+    "message": "Gitter 2x2",
+    "description": "Label for 2x2-layout"
+  },
+  "layout3x2": {
+    "message": "Gitter 3x2",
+    "description": "Label for 3x2-layout (3 kolonner, 2 rækker)"
+  },
+  "useCurrentTabs": {
+    "message": "Brug nuværende faner",
+    "description": "Kontakt til fordeling af eksisterende faner"
+  },
+  "restore": {
+    "message": "Gendan",
+    "description": "Knap til at gendanne vinduer til ét vindue"
+  },
+  "activeLayout": {
+    "message": "Aktivt layout",
+    "description": "Label når et layout er aktivt"
+  },
+  "noActiveLayout": {
+    "message": "Intet aktivt layout",
+    "description": "Label når intet layout er aktivt"
+  }
+}

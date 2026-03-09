@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Nom de l'extension"
+  },
+  "extDescription": {
+    "message": "Divisez votre navigateur en dispositions pour tester vos webapps confortablement",
+    "description": "Description de l'extension"
+  },
+  "layoutColumns": {
+    "message": "Deux colonnes",
+    "description": "Libellé de la disposition 1x2"
+  },
+  "layoutRows": {
+    "message": "Deux lignes",
+    "description": "Libellé de la disposition 2x1"
+  },
+  "layoutGrid": {
+    "message": "Grille 2x2",
+    "description": "Libellé de la disposition 2x2"
+  },
+  "layout3x2": {
+    "message": "Grille 3x2",
+    "description": "Libellé de la disposition 3x2 (3 colonnes, 2 lignes)"
+  },
+  "useCurrentTabs": {
+    "message": "Utiliser les onglets actuels",
+    "description": "Bascule pour distribuer les onglets existants"
+  },
+  "restore": {
+    "message": "Restaurer",
+    "description": "Bouton pour restaurer les fenêtres en une seule"
+  },
+  "activeLayout": {
+    "message": "Disposition active",
+    "description": "Libellé quand une disposition est active"
+  },
+  "noActiveLayout": {
+    "message": "Aucune disposition active",
+    "description": "Libellé quand aucune disposition n'est active"
+  }
+}

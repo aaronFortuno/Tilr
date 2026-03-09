@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Nom de l'extensió"
+  },
+  "extDescription": {
+    "message": "Divideix el navegador en layouts per testejar webapps còmodament",
+    "description": "Descripció de l'extensió"
+  },
+  "layoutColumns": {
+    "message": "Dues columnes",
+    "description": "Etiqueta del layout 1x2"
+  },
+  "layoutRows": {
+    "message": "Dues files",
+    "description": "Etiqueta del layout 2x1"
+  },
+  "layoutGrid": {
+    "message": "Graella 2x2",
+    "description": "Etiqueta del layout 2x2"
+  },
+  "layout3x2": {
+    "message": "Graella 3x2",
+    "description": "Etiqueta del layout 3x2 (3 columnes, 2 files)"
+  },
+  "useCurrentTabs": {
+    "message": "Usar pestanyes actuals",
+    "description": "Toggle per distribuir les pestanyes existents"
+  },
+  "restore": {
+    "message": "Restaurar",
+    "description": "Botó per restaurar finestres a una sola"
+  },
+  "activeLayout": {
+    "message": "Layout actiu",
+    "description": "Etiqueta quan hi ha un layout actiu"
+  },
+  "noActiveLayout": {
+    "message": "Sense layout actiu",
+    "description": "Etiqueta quan no hi ha cap layout actiu"
+  }
+}

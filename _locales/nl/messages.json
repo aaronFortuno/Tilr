@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Naam van de extensie"
+  },
+  "extDescription": {
+    "message": "Verdeel je browser in layouts voor comfortabel webapp-testen",
+    "description": "Beschrijving van de extensie"
+  },
+  "layoutColumns": {
+    "message": "Twee kolommen",
+    "description": "Label voor 1x2-layout"
+  },
+  "layoutRows": {
+    "message": "Twee rijen",
+    "description": "Label voor 2x1-layout"
+  },
+  "layoutGrid": {
+    "message": "Raster 2x2",
+    "description": "Label voor 2x2-layout"
+  },
+  "layout3x2": {
+    "message": "Raster 3x2",
+    "description": "Label voor 3x2-layout (3 kolommen, 2 rijen)"
+  },
+  "useCurrentTabs": {
+    "message": "Huidige tabbladen gebruiken",
+    "description": "Schakelaar om bestaande tabbladen te verdelen"
+  },
+  "restore": {
+    "message": "Herstellen",
+    "description": "Knop om vensters in één venster te herstellen"
+  },
+  "activeLayout": {
+    "message": "Actieve layout",
+    "description": "Label wanneer een layout actief is"
+  },
+  "noActiveLayout": {
+    "message": "Geen actieve layout",
+    "description": "Label wanneer geen layout actief is"
+  }
+}

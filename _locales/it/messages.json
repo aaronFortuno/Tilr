@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Nome dell'estensione"
+  },
+  "extDescription": {
+    "message": "Dividi il browser in layout per testare comodamente le webapp",
+    "description": "Descrizione dell'estensione"
+  },
+  "layoutColumns": {
+    "message": "Due colonne",
+    "description": "Etichetta del layout 1x2"
+  },
+  "layoutRows": {
+    "message": "Due righe",
+    "description": "Etichetta del layout 2x1"
+  },
+  "layoutGrid": {
+    "message": "Griglia 2x2",
+    "description": "Etichetta del layout 2x2"
+  },
+  "layout3x2": {
+    "message": "Griglia 3x2",
+    "description": "Etichetta del layout 3x2 (3 colonne, 2 righe)"
+  },
+  "useCurrentTabs": {
+    "message": "Usa le schede attuali",
+    "description": "Interruttore per distribuire le schede esistenti"
+  },
+  "restore": {
+    "message": "Ripristina",
+    "description": "Pulsante per ripristinare le finestre in una sola"
+  },
+  "activeLayout": {
+    "message": "Layout attivo",
+    "description": "Etichetta quando un layout è attivo"
+  },
+  "noActiveLayout": {
+    "message": "Nessun layout attivo",
+    "description": "Etichetta quando nessun layout è attivo"
+  }
+}

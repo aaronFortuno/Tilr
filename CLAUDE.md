@@ -18,10 +18,18 @@ tilr/
 ├── lib/
 │   └── layouts.js             # Layout definitions & position calculations
 ├── _locales/
-│   ├── en/
-│   │   └── messages.json      # English strings (default locale)
-│   └── es/
-│       └── messages.json      # Spanish strings
+│   ├── en/messages.json       # English (default)
+│   ├── es/messages.json       # Spanish
+│   ├── ca/messages.json       # Catalan
+│   ├── gl/messages.json       # Galician
+│   ├── eu/messages.json       # Basque
+│   ├── de/messages.json       # German
+│   ├── fr/messages.json       # French
+│   ├── it/messages.json       # Italian
+│   ├── pt/messages.json       # Portuguese
+│   ├── da/messages.json       # Danish
+│   ├── fi/messages.json       # Finnish
+│   └── nl/messages.json       # Dutch
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
@@ -117,7 +125,7 @@ Required manifest fields:
 
 Uses Chrome's **built-in i18n system** (`chrome.i18n` API):
 - Strings defined in `_locales/{lang}/messages.json` files.
-- Default locale: `en`. Additional locale: `es`.
+- Default locale: `en`. Additional locales: `es`, `ca`, `gl`, `eu`, `de`, `fr`, `it`, `pt`, `da`, `fi`, `nl`.
 - In `manifest.json`: add `"default_locale": "en"`.
 - In HTML/CSS: use `__MSG_keyName__` placeholders (auto-replaced by Chrome).
 - In JS: use `chrome.i18n.getMessage("keyName")`.

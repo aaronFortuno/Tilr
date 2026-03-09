@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Tilr",
+    "description": "Hedapenaren izena"
+  },
+  "extDescription": {
+    "message": "Zatitu nabigatzailea layoutetan webapp-ak eroso probatzeko",
+    "description": "Hedapenaren deskribapena"
+  },
+  "layoutColumns": {
+    "message": "Bi zutabe",
+    "description": "1x2 layoutaren etiketa"
+  },
+  "layoutRows": {
+    "message": "Bi errenkada",
+    "description": "2x1 layoutaren etiketa"
+  },
+  "layoutGrid": {
+    "message": "Sareta 2x2",
+    "description": "2x2 layoutaren etiketa"
+  },
+  "layout3x2": {
+    "message": "Sareta 3x2",
+    "description": "3x2 layoutaren etiketa (3 zutabe, 2 errenkada)"
+  },
+  "useCurrentTabs": {
+    "message": "Erabili uneko fitxak",
+    "description": "Toggle dauden fitxak banatzeko"
+  },
+  "restore": {
+    "message": "Berrezarri",
+    "description": "Botoia leihoak bakar batean berrezartzeko"
+  },
+  "activeLayout": {
+    "message": "Layout aktiboa",
+    "description": "Etiketa layout aktibo bat dagoenean"
+  },
+  "noActiveLayout": {
+    "message": "Layoutik gabe",
+    "description": "Etiketa layout aktiborik ez dagoenean"
+  }
+}
