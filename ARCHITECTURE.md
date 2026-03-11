@@ -13,7 +13,7 @@ Tilr is a Manifest V3 Chrome extension that uses `chrome.windows` to position re
 | `popup/popup.css` | Popup styles. Minimalist, 280px wide. |
 | `popup/popup.js` | Popup logic. Applies i18n, queries status on open, triggers layout/restore via messages, updates UI state. |
 | `background/service-worker.js` | Core logic. `applyLayout()` creates/positions windows. `restoreLayout()` regroups tabs. `handleWindowClosed()` updates group on window close. Session management via `chrome.storage.local`. |
-| `lib/layouts.js` | Pure functions: layout validation, window count, position calculation, display bounds extraction, multi-monitor display matching. No side effects. |
+| `lib/layouts.js` | Pure functions: layout validation, window count, position calculation, display bounds extraction, multi-monitor display matching, DWM shadow compensation. No side effects. |
 | `_locales/*/messages.json` | i18n strings (English default, Spanish). |
 | `tests/*.test.js` | Unit tests mirroring source files. |
 
@@ -55,6 +55,7 @@ User closes a layout window manually
 5. **Pure layout engine**: `layouts.js` has zero dependencies and no side effects — easy to test with any display configuration.
 6. **Dependency injection**: `popup.js` functions accept `document`, `sendMessage`, and `getMessage` as parameters for testability.
 7. **Native i18n**: Chrome's built-in `chrome.i18n` API. No external libraries.
+8. **DWM shadow compensation**: On Windows 10/11, `chrome.windows` API includes invisible 7px borders (left, right, bottom) in all measurements. Positions are expanded so visible window areas are flush. Applied as post-processing — layout engine stays pure/platform-agnostic.
 
 ## Permissions
 
@@ -69,7 +70,7 @@ User closes a layout window manually
 - **Runner**: Vitest (ESM-native, zero-config)
 - **DOM mocking**: jsdom for popup tests
 - **Chrome API mocking**: `vi.stubGlobal('chrome', ...)` with in-memory storage mock
-- **Coverage**: Every exported function has unit tests (73 tests total)
+- **Coverage**: Every exported function has unit tests (166 tests total)
 
 ## Architecture History
 
@@ -84,3 +85,5 @@ User closes a layout window manually
 - Phase 5 complete: `isEmptyTab()` filters empty/newtab tabs on restore (closes them instead of moving). `saveLastLayout()`/`loadLastLayout()` persist last used layout. `getStatus()` returns `lastLayout`. Popup shows `last-used` CSS class on the button matching the last layout.
 - New layout `3x2` added (3 columns, 2 rows, 6 windows).
 - Phase 6 complete: proper icons (4-tile grid design generated programmatically), version bumped to 1.0.0. 119 tests.
+- v1.1.0: dynamic window resizing (`onBoundsChanged`), multi-monitor support, i18n for 12 languages, privacy policy. 146 tests.
+- v1.2.0: DWM shadow compensation on Windows — eliminates visible gaps between tiled windows and screen edges. Platform detection (`navigator.userAgentData`/`navigator.platform`) applies 7px inset only on Windows; macOS/Linux unaffected. Suppresses `onBoundsChanged` during layout application to prevent interference. 166 tests.

@@ -12,6 +12,9 @@ import {
   extractSplits,
   positionsFromSplits,
   recalculateLayout,
+  SHADOW_INSET,
+  compensatePositions,
+  decompensateBounds,
 } from '../lib/layouts.js';
 
 describe('LAYOUT_TYPES', () => {
@@ -432,5 +435,93 @@ describe('recalculateLayout', () => {
 
   it('should return null for invalid layout', () => {
     expect(recalculateLayout(0, { left: 0, top: 0, width: 100, height: 100 }, display, 'invalid')).toBeNull();
+  });
+});
+
+// --- Shadow compensation tests ---
+
+describe('SHADOW_INSET', () => {
+  it('should be 7', () => {
+    expect(SHADOW_INSET).toBe(7);
+  });
+});
+
+describe('compensatePositions', () => {
+  it('should return positions unchanged when inset is 0', () => {
+    const positions = [{ left: 0, top: 0, width: 960, height: 1080 }];
+    expect(compensatePositions(positions, 0)).toEqual(positions);
+  });
+
+  it('should extend each window by inset on left, right and bottom', () => {
+    const positions = [{ left: 0, top: 0, width: 960, height: 1080 }];
+    const result = compensatePositions(positions, 7);
+    expect(result[0]).toEqual({ left: -7, top: 0, width: 974, height: 1087 });
+  });
+
+  it('should not modify the top value', () => {
+    const positions = [{ left: 100, top: 200, width: 500, height: 400 }];
+    const result = compensatePositions(positions, 7);
+    expect(result[0].top).toBe(200);
+  });
+
+  it('should produce flush visible edges for 1x2 layout', () => {
+    // Two side-by-side windows on 1920px screen
+    const positions = [
+      { left: 0, top: 0, width: 960, height: 1080 },
+      { left: 960, top: 0, width: 960, height: 1080 },
+    ];
+    const result = compensatePositions(positions, 7);
+    // Visible left of W1: -7 + 7 = 0 (flush with screen)
+    expect(result[0].left + 7).toBe(0);
+    // Visible right of W1: -7 + 974 - 7 = 960
+    expect(result[0].left + result[0].width - 7).toBe(960);
+    // Visible left of W2: 953 + 7 = 960 (flush with W1)
+    expect(result[1].left + 7).toBe(960);
+    // Visible right of W2: 953 + 974 - 7 = 1920 (flush with screen)
+    expect(result[1].left + result[1].width - 7).toBe(1920);
+  });
+
+  it('should produce flush visible edges for 2x1 layout', () => {
+    const positions = [
+      { left: 0, top: 0, width: 1920, height: 540 },
+      { left: 0, top: 540, width: 1920, height: 540 },
+    ];
+    const result = compensatePositions(positions, 7);
+    // Visible bottom of W1: 0 + 547 - 7 = 540
+    expect(result[0].top + result[0].height - 7).toBe(540);
+    // Visible top of W2: 540 (no top shadow)
+    expect(result[1].top).toBe(540);
+  });
+
+  it('should handle all four quadrants in 2x2', () => {
+    const positions = getPositions({ left: 0, top: 0, width: 1920, height: 1080 }, '2x2');
+    const result = compensatePositions(positions, 7);
+    expect(result).toHaveLength(4);
+    // All get wider and taller
+    result.forEach(pos => {
+      expect(pos.width).toBeGreaterThan(960);
+      expect(pos.height).toBeGreaterThan(540);
+    });
+  });
+});
+
+describe('decompensateBounds', () => {
+  it('should return bounds unchanged when inset is 0', () => {
+    const bounds = { left: -7, top: 0, width: 974, height: 1087 };
+    expect(decompensateBounds(bounds, 0)).toEqual(bounds);
+  });
+
+  it('should reverse the compensation', () => {
+    const original = { left: 0, top: 0, width: 960, height: 1080 };
+    const compensated = compensatePositions([original], 7)[0];
+    const restored = decompensateBounds(compensated, 7);
+    expect(restored).toEqual(original);
+  });
+
+  it('should be the inverse of compensatePositions for any bounds', () => {
+    const original = { left: 500, top: 200, width: 800, height: 600 };
+    const compensated = compensatePositions([original], 7)[0];
+    const restored = decompensateBounds(compensated, 7);
+    expect(restored).toEqual(original);
   });
 });

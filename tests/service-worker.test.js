@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // --- Chrome API mocks ---
 
@@ -64,6 +64,9 @@ const mockChrome = {
 };
 
 vi.stubGlobal('chrome', mockChrome);
+// Default to non-Windows so existing tests get uncompensated positions.
+// Windows-specific tests override this explicitly.
+vi.stubGlobal('navigator', { platform: 'Linux x86_64' });
 
 const {
   saveSession,
@@ -81,6 +84,8 @@ const {
   loadLastLayout,
   handleWindowClosed,
   handleBoundsChanged,
+  getShadowInset,
+  _resetAdjusting,
 } = await import('../background/service-worker.js');
 
 // --- Tests ---
@@ -611,6 +616,7 @@ describe('handleBoundsChanged', () => {
     storage = {};
     vi.clearAllMocks();
     mockChrome.windows.update.mockResolvedValue({});
+    _resetAdjusting();
   });
 
   it('should do nothing if no active sessions', async () => {
@@ -727,5 +733,36 @@ describe('Message handler', () => {
   it('should return true for async response support', () => {
     const result = listeners.onMessage({ action: 'getStatus', windowId: 1 }, {}, sendResponse);
     expect(result).toBe(true);
+  });
+});
+
+describe('getShadowInset', () => {
+  afterEach(() => {
+    vi.stubGlobal('navigator', { platform: 'Linux x86_64' });
+  });
+
+  it('should return 0 for Linux', () => {
+    vi.stubGlobal('navigator', { platform: 'Linux x86_64' });
+    expect(getShadowInset()).toBe(0);
+  });
+
+  it('should return 7 when navigator.platform starts with Win', () => {
+    vi.stubGlobal('navigator', { platform: 'Win32' });
+    expect(getShadowInset()).toBe(7);
+  });
+
+  it('should return 7 when userAgentData.platform is Windows', () => {
+    vi.stubGlobal('navigator', { platform: 'Win32', userAgentData: { platform: 'Windows' } });
+    expect(getShadowInset()).toBe(7);
+  });
+
+  it('should return 0 when userAgentData.platform is macOS', () => {
+    vi.stubGlobal('navigator', { platform: 'MacIntel', userAgentData: { platform: 'macOS' } });
+    expect(getShadowInset()).toBe(0);
+  });
+
+  it('should return 0 when navigator is unavailable', () => {
+    vi.stubGlobal('navigator', {});
+    expect(getShadowInset()).toBe(0);
   });
 });

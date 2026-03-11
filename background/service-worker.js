@@ -4,7 +4,22 @@
  * Supports independent layouts per display (multi-monitor).
  */
 
-import { computeLayout, isValidLayout, recalculateLayout, getDisplayBounds, findDisplayForWindow } from '../lib/layouts.js';
+import { computeLayout, isValidLayout, recalculateLayout, getDisplayBounds, findDisplayForWindow, compensatePositions, decompensateBounds, SHADOW_INSET } from '../lib/layouts.js';
+
+/**
+ * Returns the shadow inset to use for the current platform.
+ * Windows 10/11 has 7px invisible DWM borders; macOS/Linux have none.
+ */
+export function getShadowInset() {
+  try {
+    if (navigator.userAgentData?.platform) {
+      return navigator.userAgentData.platform === 'Windows' ? SHADOW_INSET : 0;
+    }
+    return (navigator.platform?.startsWith('Win')) ? SHADOW_INSET : 0;
+  } catch (_e) {
+    return 0;
+  }
+}
 
 // --- Session management (multi-monitor) ---
 
@@ -61,7 +76,11 @@ export async function resolveDisplay(windowId) {
     chrome.system.display.getInfo(),
     chrome.windows.get(windowId),
   ]);
-  const display = findDisplayForWindow(displays, { left: win.left, top: win.top });
+  // Decompensate: Chrome-reported position may include our shadow offset
+  // (left=-7 instead of 0). Adding inset back ensures correct display matching.
+  const inset = getShadowInset();
+  const position = { left: win.left + inset, top: win.top };
+  const display = findDisplayForWindow(displays, position);
   return { displayId: display.id, displayBounds: getDisplayBounds(display) };
 }
 
@@ -81,7 +100,10 @@ export async function resolveLayout(layoutType, windowId) {
     chrome.windows.get(windowId),
   ]);
 
-  const windowPosition = { left: sourceWindow.left, top: sourceWindow.top };
+  // Decompensate: if a previous layout was applied, the window may be at
+  // a compensated position (e.g. left=-7). Adjust for correct display matching.
+  const inset = getShadowInset();
+  const windowPosition = { left: sourceWindow.left + inset, top: sourceWindow.top };
   const positions = computeLayout(displays, windowPosition, layoutType);
 
   if (!positions) return null;
@@ -132,48 +154,63 @@ export async function applyLayout(layoutType, windowId, useCurrentTabs = false) 
 
   const { positions, sourceWindow, displayId, displayBounds } = resolved;
 
-  // If there's an existing session on this display, restore it first
-  const existing = await loadSession(displayId);
-  if (existing) {
-    await restoreSessionWindows(existing);
-    await clearSession(displayId);
-  }
+  // Compensate for invisible DWM shadows on Windows
+  const inset = getShadowInset();
+  const adjusted = compensatePositions(positions, inset);
 
-  const windowIds = [];
-  const initialTabIds = [];
+  // Suppress dynamic resize during layout application.
+  // Window creation, tab moves, and Chrome settling can fire onBoundsChanged
+  // events that would recalculate positions before the layout is complete.
+  isAdjusting = true;
 
-  // Reposition source window to the first slot
-  await chrome.windows.update(sourceWindow.id, {
-    left: positions[0].left,
-    top: positions[0].top,
-    width: positions[0].width,
-    height: positions[0].height,
-    state: 'normal',
-  });
-  windowIds.push(sourceWindow.id);
-
-  // Create new windows for remaining slots
-  for (let i = 1; i < positions.length; i++) {
-    const newWindow = await chrome.windows.create({
-      left: positions[i].left,
-      top: positions[i].top,
-      width: positions[i].width,
-      height: positions[i].height,
-      focused: false,
-    });
-    windowIds.push(newWindow.id);
-    if (newWindow.tabs && newWindow.tabs.length > 0) {
-      initialTabIds.push(newWindow.tabs[0].id);
+  try {
+    // If there's an existing session on this display, restore it first
+    const existing = await loadSession(displayId);
+    if (existing) {
+      await restoreSessionWindows(existing);
+      await clearSession(displayId);
     }
-  }
 
-  if (useCurrentTabs) {
-    await distributeTabs(sourceWindow.id, windowIds, initialTabIds);
-  }
+    const windowIds = [];
+    const initialTabIds = [];
 
-  await saveSession(displayId, layoutType, windowIds, displayBounds);
-  await saveLastLayout(layoutType);
-  return { success: true, windowIds };
+    // Reposition source window to the first slot
+    await chrome.windows.update(sourceWindow.id, {
+      left: adjusted[0].left,
+      top: adjusted[0].top,
+      width: adjusted[0].width,
+      height: adjusted[0].height,
+      state: 'normal',
+    });
+    windowIds.push(sourceWindow.id);
+
+    // Create new windows for remaining slots
+    for (let i = 1; i < adjusted.length; i++) {
+      const newWindow = await chrome.windows.create({
+        left: adjusted[i].left,
+        top: adjusted[i].top,
+        width: adjusted[i].width,
+        height: adjusted[i].height,
+        focused: false,
+      });
+      windowIds.push(newWindow.id);
+      if (newWindow.tabs && newWindow.tabs.length > 0) {
+        initialTabIds.push(newWindow.tabs[0].id);
+      }
+    }
+
+    if (useCurrentTabs) {
+      await distributeTabs(sourceWindow.id, windowIds, initialTabIds);
+    }
+
+    await saveSession(displayId, layoutType, windowIds, displayBounds);
+    await saveLastLayout(layoutType);
+    return { success: true, windowIds };
+  } finally {
+    // Keep suppression active briefly after layout completes so any
+    // pending onBoundsChanged events (debounced at 100ms) are ignored.
+    setTimeout(() => { isAdjusting = false; }, DEBOUNCE_MS + 50);
+  }
 }
 
 /**
@@ -288,6 +325,9 @@ export async function handleWindowClosed(closedWindowId) {
 
 let isAdjusting = false;
 let boundsChangeTimer = null;
+
+/** @internal — resets the adjusting lock; exposed for testing only. */
+export function _resetAdjusting() { isAdjusting = false; }
 const DEBOUNCE_MS = 100;
 
 /**
@@ -315,21 +355,26 @@ export async function handleBoundsChanged(chromeWindow) {
 
   const { layoutType, windowIds, displayBounds } = foundSession;
 
-  const changedBounds = {
+  // Decompensate Chrome-reported bounds back to logical space
+  const inset = getShadowInset();
+  const changedBounds = decompensateBounds({
     left: chromeWindow.left,
     top: chromeWindow.top,
     width: chromeWindow.width,
     height: chromeWindow.height,
-  };
+  }, inset);
 
   const newPositions = recalculateLayout(changedIndex, changedBounds, displayBounds, layoutType);
   if (!newPositions) return;
+
+  // Compensate output positions for DWM shadows
+  const adjusted = compensatePositions(newPositions, inset);
 
   isAdjusting = true;
   try {
     for (let i = 0; i < windowIds.length; i++) {
       if (i === changedIndex) continue;
-      const pos = newPositions[i];
+      const pos = adjusted[i];
       await chrome.windows.update(windowIds[i], {
         left: pos.left,
         top: pos.top,
